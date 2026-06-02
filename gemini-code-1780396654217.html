@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Special Gift - Blue Floral</title>
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --blue-primary: #38bdf8;
+            --blue-secondary: #0284c7;
+            --blue-light: #e0f2fe;
+            --text-light: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* --- SCREEN 1: PIN ACCESS --- */
+        .pin-container {
+            background: rgba(2, 132, 199, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            text-align: center;
+            box-shadow: 0 0 40px rgba(2, 132, 199, 0.15);
+            max-width: 360px;
+            width: 100%;
+        }
+
+        .pin-container h2 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--blue-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .pin-container p {
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            color: var(--blue-light);
+            opacity: 0.7;
+        }
+
+        .pin-inputs {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .pin-box {
+            width: 50px;
+            height: 55px;
+            border: 1.5px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            background: rgba(9, 13, 22, 0.8);
+            color: #fff;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .pin-box:focus {
+            outline: none;
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--blue-secondary), var(--blue-primary));
+            border: none;
+            padding: 12px 35px;
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+        }
+
+        /* --- SEMERBAK TRANSISI BUNGA MAWAR & LILY --- */
+        #flower-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .blooming-flower-mesh {
+            position: absolute;
+            font-size: 0px;
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+            user-select: none;
+            filter: drop-shadow(0 5px 15px rgba(2,132,199,0.4));
+        }
+
+        /* --- SCREEN 2: SLIDESHOW FOTO --- */
+        .slider-wrapper {
+            width: 100%;
+            max-width: 420px;
+            height: 82vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 82%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            background: #111827;
+            border: 1px solid rgba(56, 189, 248, 0.15);
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            background: #111827;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide.prev-slide {
+            transform: translateX(-100%);
+        }
+
+        .slide img {
+            width: 100%;
+            height: 76%;
+            object-fit: cover;
+        }
+
+        .slide-caption {
+            height: 24%;
+            background: rgba(9, 13, 22, 0.95);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--blue-light);
+            border-top: 1px solid rgba(56, 189, 248, 0.2);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 0 5px;
+        }
+
+        .nav-btn {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--blue-secondary);
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        /* --- RAIN KELOPAK MAWAR & LILY BIRU --- */
+        .petal {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear infinite;
+            user-select: none;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) rotate(0deg) scale(0.6);
+                opacity: 0;
+            }
+            15% { opacity: 0.8; }
+            100% {
+                transform: translateY(105vh) rotate(360deg) scale(1.1);
+                opacity: 0;
+            }
+        }
+
+        /* --- SCREEN 3: SURAT AMPLOP --- */
+        .envelope-container {
+            cursor: pointer;
+            position: relative;
+            width: 260px;
+            height: 180px;
+            background: #0284c7;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+            margin-bottom: 40px;
+        }
+
+        .envelope-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-top: 105px solid #0369a1;
+            transform-origin: top;
+            transition: transform 0.4s ease;
+            z-index: 3;
+        }
+
+        .envelope-container.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            width: 260px;
+            height: 115px;
+            background: #0ea5e9;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 2;
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            width: 230px;
+            height: 140px;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            color: #0f172a;
+            z-index: 15;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.5s;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(0);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .envelope-container.open .letter {
+            opacity: 1;
+            transform: translateY(-120px) scale(1.3);
+            pointer-events: auto;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.6);
+            height: auto;
+            min-height: 170px;
+        }
+
+        .letter p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .letter .signature {
+            margin-top: 15px;
+            font-weight: bold;
+            font-style: normal;
+            color: var(--blue-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- SCREEN 4: ANIMASI AKHIR --- */
+        .animated-text {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--blue-primary);
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.8);
+            animation: fadeInOut 2.5s ease-in-out infinite;
+            letter-spacing: 3px;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: scale(0.85); filter: blur(5px); }
+            50% { opacity: 1; transform: scale(1.05); filter: blur(0px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="petal-container"></div>
+    <div id="flower-transition-overlay"></div>
+
+    <div class="screen active" id="screen-pin">
+        <div class="pin-container">
+            <h2>Masukkan PIN Kenangan</h2>
+            <p>Tanggal awal pertemuan kita</p>
+            <div class="pin-inputs">
+                <input type="text" maxlength="2" class="pin-box" id="pin1" placeholder="DD" oninput="moveFocus(this, 'pin2')">
+                <input type="text" maxlength="2" class="pin-box" id="pin2" placeholder="MM" oninput="moveFocus(this, 'pin3')">
+                <input type="text" maxlength="4" class="pin-box" id="pin3" style="width: 75px;" placeholder="YYYY">
+            </div>
+            <button class="btn" onclick="checkPin()">Buka Kisah</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-slideshow">
+        <div class="slider-wrapper">
+            <div class="slide-container">
+                <div class="slide active">
+                    <img src="foto1.jpg" alt="Foto 1">
+                    <div class="slide-caption">hai aku addel kecil dan nanda kecil kita</div>
+                </div>
+                <div class="slide">
+                    <img src="foto2.jpg" alt="Foto 2">
+                    <div class="slide-caption">jujur disini kamu ganteng banget</div>
+                </div>
+                <div class="slide">
+                    <img src="foto3.jpg" alt="Foto 3">
+                    <div class="slide-caption">hai manis berjaket pink</div>
+                </div>
+                <div class="slide">
+                    <img src="foto4.jpg" alt="Foto 4">
+                    <div class="slide-caption">kenalin ini perantara kita namanya cipuy dan cipoy</div>
+                </div>
+                <div class="slide">
+                    <img src="foto5.jpg" alt="Foto 5">
+                    <div class="slide-caption">foto jamet kita di roblox</div>
+                </div>
+                <div class="slide">
+                    <img src="foto6.jpg" alt="Foto 6">
+                    <div class="slide-caption">ini aku lebih fokus ke rambut baruku yang abis dipotong masa awal banget vc an</div>
+                </div>
+                <div class="slide">
+                    <img src="foto7.jpg" alt="Foto 7">
+                    <div class="slide-caption">testi hp ip baru wkwkwk</div>
+                </div>
+            </div>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="changeSlide(-1)">&#10094;</button>
+                <button class="btn" id="next-journey-btn" style="display: none;" onclick="triggerFlowerTransition(3)">Lanjutkan</button>
+                <button class="nav-btn" onclick="changeSlide(1)">&#10095;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-envelope">
+        <h2 style="color: var(--blue-primary); margin-bottom: 35px; font-size: 1.1rem; letter-spacing: 1px; font-weight: 500;">Klik Amplop untuk Membuka Surat</h2>
+        <div class="envelope-container" id="envelope" onclick="openEnvelope()">
+            <div class="envelope-flap"></div>
+            <div class="envelope-pocket"></div>
+            <div class="letter">
+                <p>"Terimakasih karena kamu selalu belajar menyayangiku"</p>
+                <div class="signature">- nando</div>
+            </div>
+        </div>
+        <button class="btn" id="btn-final" style="display:none; margin-top: 20px;" onclick="goToFinalScreen()">Kisah ini akan berlanjut...</button>
+    </div>
+
+    <div class="screen" id="screen-final">
+        <div class="animated-text">love u</div>
+    </div>
+
+    <script>
+        // Array ornamen emoji mawar biru, lily, mawar biasa, dan daun biru estetik
+        const blueFlowers = ['🌹', '🪻', '🌸', '💐', '🍃']; 
+        // Kode modifikasi warna dasar emisi kelopak bunga via filter css hue-rotate agar bernuansa murni biru/cyan
+        const flowerFilters = [
+            'hue-rotate(190deg) brightness(1.2)', 
+            'hue-rotate(220deg) saturate(1.5)', 
+            'hue-rotate(240deg) brightness(0.9)',
+            'hue-rotate(170deg) saturate(1.2)'
+        ];
+
+        function moveFocus(current, nextId) {
+            if (current.value.length >= current.maxLength) {
+                document.getElementById(nextId).focus();
+            }
+        }
+
+        function checkPin() {
+            const p1 = document.getElementById('pin1').value;
+            const p2 = document.getElementById('pin2').value;
+            const p3 = document.getElementById('pin3').value;
+
+            if (p1 === '02' && p2 === '09' && p3 === '2025') {
+                triggerFlowerTransition(2);
+            } else {
+                alert('PIN salah, coba ingat-ingat lagi tanggal awal kita bertemu ya! ❤️');
+            }
+        }
+
+        // --- TRANSISI SEMERBAK BUNGA MAWAR & LILY BIRU BERMEKARAN ---
+        function triggerFlowerTransition(targetScreenId) {
+            const overlay = document.getElementById('flower-transition-overlay');
+            overlay.innerHTML = ''; 
+            
+            const flowerCount = 35; // Jumlah kluster bunga diperbanyak agar padat memukau
+            
+            for(let i=0; i<flowerCount; i++) {
+                const flower = document.createElement('div');
+                flower.classList.add('blooming-flower-mesh');
+                
+                // Pilih kelopak acak
+                flower.innerText = blueFlowers[Math.floor(Math.random() * blueFlowers.length)];
+                // Berikan filter warna biru/cyan indigo semerbak
+                flower.style.filter = flowerFilters[Math.floor(Math.random() * flowerFilters.length)];
+                
+                // Sebar acak posisi koordinat di layar
+                flower.style.left = Math.random() * 90 + 'vw';
+                flower.style.top = Math.random() * 90 + 'vh';
+                
+                // Atur variasi waktu mekar bergelombang
+                flower.style.transitionDelay = (Math.random() * 0.5) + 's';
+                overlay.appendChild(flower);
+                
+                // Picu animasi mekar membesar
+                setTimeout(() => {
+                    flower.style.fontSize = (Math.random() * 60) + 70 + 'px'; // Ukuran bunga mawar & lily membesar penuh
+                    flower.style.opacity = '0.95';
+                    flower.style.transform = `scale(1) rotate(${Math.random() * 90 - 45}deg)`;
+                }, 50);
+            }
+
+            // Pindah screen tepat saat layar penuh dengan mawar/lily biru
+            setTimeout(() => {
+                switchScreen(targetScreenId);
+                if(targetScreenId === 3) {
+                    startPetalFall(); 
+                }
+            }, 1000);
+
+            // Bersihkan transisi secara perlahan seolah tertiup angin
+            setTimeout(() => {
+                const flowers = document.querySelectorAll('.blooming-flower-mesh');
+                flowers.forEach(f => {
+                    f.style.opacity = '0';
+                    f.style.transform = 'scale(0.3) translateY(30px)';
+                });
+            }, 1800);
+        }
+
+        function switchScreen(screenNumber) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            if (screenNumber === 2) document.getElementById('screen-slideshow').classList.add('active');
+            if (screenNumber === 3) document.getElementById('screen-envelope').classList.add('active');
+            if (screenNumber === 4) document.getElementById('screen-final').classList.add('active');
+        }
+
+        let currentSlideIdx = 0;
+        const slides = document.querySelectorAll('.slide');
+        
+        function changeSlide(direction) {
+            slides[currentSlideIdx].classList.remove('active');
+            slides[currentSlideIdx].classList.remove('prev-slide');
+            
+            if(direction === 1 && currentSlideIdx < slides.length - 1) {
+                slides[currentSlideIdx].classList.add('prev-slide');
+                currentSlideIdx++;
+            } else if(direction === -1 && currentSlideIdx > 0) {
+                currentSlideIdx--;
+            }
+            
+            slides[currentSlideIdx].classList.add('active');
+
+            if (currentSlideIdx === slides.length - 1) {
+                document.getElementById('next-journey-btn').style.display = 'inline-block';
+            }
+        }
+
+        // --- HUJAN KELOPAK MAWAR & LILY BIRU GUGUR ---
+        function startPetalFall() {
+            const container = document.getElementById('petal-container');
+            setInterval(() => {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                
+                petal.innerText = ['💙', '🪻', '🍃', '💎'][Math.floor(Math.random() * 4)];
+                petal.style.filter = flowerFilters[Math.floor(Math.random() * flowerFilters.length)];
+                petal.style.fontSize = (Math.random() * 10) + 15 + 'px';
+                petal.style.left = Math.random() * 100 + 'vw';
+                
+                petal.style.animationDuration = (Math.random() * 3) + 4 + 's';
+                container.appendChild(petal);
+                
+                setTimeout(() => { petal.remove(); }, 6000);
+            }, 150);
+        }
+
+        function openEnvelope() {
+            document.getElementById('envelope').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('btn-final').style.display = 'inline-block';
+            }, 1000);
+        }
+
+        function goToFinalScreen() {
+            switchScreen(4);
+        }
+    </script>
+</body>
+</html>
